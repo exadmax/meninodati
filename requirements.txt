@@ -1,2 +1,13 @@
+# GUI Dependencies
 tkinter-tooltip==2.1.0
 Pillow==10.4.0
+
+# Build Tool
+pyinstaller==6.3.0
+
+# Python Standard Libraries (já incluídos, listados para referência)
+# - tkinter (GUI)
+# - threading (multi-threading)
+# - subprocess (execução PowerShell)
+# - logging (logs)
+# - ctypes (verificação admin)
