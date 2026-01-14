@@ -1,14 +1,15 @@
 """
-Menino de TI Helper - Windows Update Automation Tool
-Automatically updates all applications and runs Windows Update
+main.py - Ponto de entrada principal da aplicação Menino de TI Helper
+
+Este arquivo inicializa e executa a aplicação com a nova arquitetura modular.
 """
 import tkinter as tk
-from tkinter import ttk, scrolledtext, messagebox
-import threading
 import logging
 import sys
 from datetime import datetime
-from powershell_manager import PowerShellManager
+from gui_main_window import MeninoDeTIHelperGUI
+from gui_utils import center_window
+from gui_constants import MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT
 
 # Configure logging
 logging.basicConfig(
