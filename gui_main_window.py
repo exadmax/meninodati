@@ -16,6 +16,7 @@ from gui_constants import (
 from gui_utils import is_admin, center_window
 from gui_admin_dialog import AdminWarningDialog
 from gui_progress_window import ProgressWindow
+from gui_cleanup_dialog import CleanupDialog
 
 logger = logging.getLogger(__name__)
 
@@ -149,13 +150,25 @@ class MeninoDeTIHelperGUI:
         )
         self.windows_btn.pack(side=tk.RIGHT, fill=tk.X, expand=True, padx=(5, 0), ipady=10)
         
+        # Frame para botões adicionais
+        additional_frame = ttk.Frame(button_frame)
+        additional_frame.pack(fill=tk.X, pady=10)
+        
+        # Botão de limpeza
+        self.cleanup_btn = ttk.Button(
+            additional_frame,
+            text="🧹 Limpeza do Sistema",
+            command=self.open_cleanup_dialog
+        )
+        self.cleanup_btn.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5), ipady=10)
+        
         # Botão de ajuda
         help_btn = ttk.Button(
-            button_frame,
-            text="❓ Como executar como Administrador",
+            additional_frame,
+            text="❓ Administrador",
             command=self.show_admin_help
         )
-        help_btn.pack(fill=tk.X, pady=(20, 0))
+        help_btn.pack(side=tk.RIGHT, fill=tk.X, expand=True, padx=(5, 0), ipady=10)
         
         # Status bar
         status_frame = ttk.Frame(main_frame)
@@ -195,17 +208,23 @@ class MeninoDeTIHelperGUI:
         """Mostra ajuda sobre como executar como administrador"""
         AdminWarningDialog(self.root)
         
+    def open_cleanup_dialog(self):
+        """Abre o diálogo de limpeza"""
+        dialog = CleanupDialog(self.root)
+        
     def disable_buttons(self):
         """Desabilita todos os botões"""
         self.main_btn.config(state=BUTTON_DISABLED)
         self.apps_btn.config(state=BUTTON_DISABLED)
         self.windows_btn.config(state=BUTTON_DISABLED)
+        self.cleanup_btn.config(state=BUTTON_DISABLED)
         
     def enable_buttons(self):
         """Habilita todos os botões"""
         self.main_btn.config(state=BUTTON_ENABLED)
         self.apps_btn.config(state=BUTTON_ENABLED)
         self.windows_btn.config(state=BUTTON_ENABLED)
+        self.cleanup_btn.config(state=BUTTON_ENABLED)
         
     def start_full_update(self):
         """Inicia atualização completa"""
