@@ -19,6 +19,7 @@ class ProgressWindow:
             parent: Janela pai (Tk root)
             title: Título da janela
         """
+        self.parent = parent  # Manter referência ao root para threading
         self.window = tk.Toplevel(parent)
         self.window.title(title)
         self.window.geometry(f"{PROGRESS_WINDOW_WIDTH}x{PROGRESS_WINDOW_HEIGHT}")
@@ -110,7 +111,7 @@ class ProgressWindow:
         
     def update_progress(self, percent, step_text="", desc_text="", log_text=""):
         """
-        Atualiza a barra de progresso.
+        Atualiza a barra de progresso de forma thread-safe.
         
         Args:
             percent: Porcentagem (0-100)
@@ -118,40 +119,66 @@ class ProgressWindow:
             desc_text: Descrição
             log_text: Texto do log
         """
-        self.progress_var.set(percent)
-        self.percent_var.set(f"{int(percent)}%")
-        
-        if step_text:
-            self.step_var.set(step_text)
-        if desc_text:
-            self.desc_var.set(desc_text)
-        if log_text:
-            self.log(log_text)
+        # Usar root.after para garantir thread-safety
+        self.parent.after(0, self._update_progress_impl, percent, step_text, desc_text, log_text)
+    
+    def _update_progress_impl(self, percent, step_text, desc_text, log_text):
+        """Implementação interna de atualização (chamada da thread principal)"""
+        try:
+            self.progress_var.set(percent)
+            self.percent_var.set(f"{int(percent)}%")
             
-        self.window.update()
+            if step_text:
+                self.step_var.set(step_text)
+            if desc_text:
+                self.desc_var.set(desc_text)
+            if log_text:
+                self._log_impl(log_text)
+                
+            self.window.update_idletasks()
+        except Exception as e:
+            print(f"Erro ao atualizar progresso: {e}")
         
     def log(self, message):
         """
-        Adiciona mensagem ao log.
+        Adiciona mensagem ao log de forma thread-safe.
         
         Args:
             message: Mensagem para adicionar
         """
-        timestamp = datetime.now().strftime(LOG_TIMESTAMP_FORMAT)
-        self.log_text.insert(tk.END, f"[{timestamp}] {message}\n")
-        self.log_text.see(tk.END)
-        self.window.update()
+        self.parent.after(0, self._log_impl, message)
+    
+    def _log_impl(self, message):
+        """Implementação interna de log (chamada da thread principal)"""
+        try:
+            timestamp = datetime.now().strftime(LOG_TIMESTAMP_FORMAT)
+            self.log_text.insert(tk.END, f"[{timestamp}] {message}\n")
+            self.log_text.see(tk.END)
+            self.window.update_idletasks()
+        except Exception as e:
+            print(f"Erro ao adicionar log: {e}")
         
     def set_status(self, status):
         """
-        Atualiza o status.
+        Atualiza o status de forma thread-safe.
         
         Args:
             status: Novo status
         """
-        self.status_var.set(status)
-        self.window.update()
+        self.parent.after(0, self._set_status_impl, status)
+    
+    def _set_status_impl(self, status):
+        """Implementação interna de set_status (chamada da thread principal)"""
+        try:
+            self.status_var.set(status)
+            self.window.update_idletasks()
+        except Exception as e:
+            print(f"Erro ao atualizar status: {e}")
         
     def close(self):
-        """Fecha a janela"""
-        self.window.destroy()
+        """Fecha a janela de forma thread-safe"""
+        try:
+            if self.window and self.window.winfo_exists():
+                self.window.destroy()
+        except Exception as e:
+            print(f"Erro ao fechar janela de progresso: {e}")

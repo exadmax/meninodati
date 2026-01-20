@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Script de build para gerar executável do Menino de TI Helper
 """
@@ -9,14 +10,14 @@ from pathlib import Path
 
 def clean_build_folders():
     """Remove pastas de build anteriores"""
-    print("🧹 Limpando builds anteriores...")
+    print("[CLEANUP] Limpando builds anteriores...")
     folders_to_remove = ['build', 'dist', '__pycache__']
     
     for folder in folders_to_remove:
         if os.path.exists(folder):
             try:
                 shutil.rmtree(folder)
-                print(f"  ✓ Removido: {folder}")
+                print(f"  [OK] Removido: {folder}")
             except Exception as e:
                 print(f"  ⚠ Aviso ao remover {folder}: {e}")
     
@@ -26,11 +27,11 @@ def clean_build_folders():
             spec_file.unlink()
             print(f"  ✓ Removido: {spec_file}")
         except Exception as e:
-            print(f"  ⚠ Aviso ao remover {spec_file}: {e}")
+            print(f"  [WARN] Aviso ao remover {spec_file}: {e}")
 
 def check_pyinstaller():
     """Verifica se PyInstaller está instalado"""
-    print("🔍 Verificando PyInstaller...")
+    print("[CHECK] Verificando PyInstaller...")
     try:
         result = subprocess.run(
             [sys.executable, '-m', 'pip', 'show', 'pyinstaller'],
@@ -38,13 +39,13 @@ def check_pyinstaller():
             text=True
         )
         if result.returncode == 0:
-            print("  ✓ PyInstaller encontrado")
+            print("  [OK] PyInstaller encontrado")
             return True
         else:
-            print("  ✗ PyInstaller não encontrado")
+            print("  [NOT FOUND] PyInstaller não encontrado")
             return False
     except Exception as e:
-        print(f"  ✗ Erro ao verificar PyInstaller: {e}")
+        print(f"  [ERROR] Erro ao verificar PyInstaller: {e}")
         return False
 
 def install_pyinstaller():
@@ -55,15 +56,15 @@ def install_pyinstaller():
             [sys.executable, '-m', 'pip', 'install', 'pyinstaller'],
             check=True
         )
-        print("  ✓ PyInstaller instalado com sucesso")
+        print("  [OK] PyInstaller instalado com sucesso")
         return True
     except subprocess.CalledProcessError as e:
-        print(f"  ✗ Erro ao instalar PyInstaller: {e}")
+        print(f"  [ERROR] Erro ao instalar PyInstaller: {e}")
         return False
 
 def build_executable():
     """Gera o executável usando PyInstaller"""
-    print("\n🔨 Construindo executável...")
+    print("\n[BUILD] Construindo executável...")
     print("=" * 60)
     
     # Parâmetros do PyInstaller
@@ -82,8 +83,6 @@ def build_executable():
         '--hidden-import=tkinter.ttk',
         '--hidden-import=tkinter.scrolledtext',
         '--hidden-import=tkinter.messagebox',
-        # Manifestar admin
-        '--uac-admin',                   # Solicitar privilégios de admin
         'main_gui.py'                    # Arquivo principal
     ]
     
@@ -93,14 +92,14 @@ def build_executable():
         result = subprocess.run(cmd, check=True)
         
         print("\n" + "=" * 60)
-        print("✅ Build concluído com sucesso!")
+        print("[SUCCESS] Build concluído com sucesso!")
         print("=" * 60)
         
         # Verificar se o executável foi criado
         exe_path = Path('dist') / 'MeninoDeTIHelper.exe'
         if exe_path.exists():
             size_mb = exe_path.stat().st_size / (1024 * 1024)
-            print(f"\n📦 Executável criado:")
+            print(f"\n[FILE] Executável criado:")
             print(f"   Localização: {exe_path.absolute()}")
             print(f"   Tamanho: {size_mb:.2f} MB")
             return True
@@ -192,16 +191,21 @@ Desenvolvido por exadmax
         readme_path = Path('dist') / 'README_EXECUTAVEL.txt'
         readme_path.parent.mkdir(exist_ok=True)
         readme_path.write_text(readme_content, encoding='utf-8')
-        print(f"  ✓ README criado: {readme_path}")
+        print(f"  [OK] README criado: {readme_path}")
         return True
     except Exception as e:
-        print(f"  ⚠ Erro ao criar README: {e}")
+        print(f"  [WARN] Erro ao criar README: {e}")
         return False
 
 def main():
     """Função principal"""
+    # Forçar UTF-8 no stdout
+    import io
+    if sys.stdout.encoding != 'utf-8':
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    
     print("=" * 60)
-    print("🔧 Menino de TI Helper - Build Script")
+    print("[BUILD] Menino de TI Helper - Build Script")
     print("=" * 60)
     print()
     
@@ -225,7 +229,7 @@ def main():
     create_readme_for_exe()
     
     print("\n" + "=" * 60)
-    print("🎉 PROCESSO CONCLUÍDO COM SUCESSO!")
+    print("\n[SUCCESS] PROCESSO CONCLUÍDO!")
     print("=" * 60)
     print("\n📁 Seus arquivos estão em: dist/")
     print("   - MeninoDeTIHelper.exe (executável)")

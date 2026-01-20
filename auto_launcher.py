@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 auto_launcher.py - Launcher automático que detecta argumentos de modo
 Permite executar com: python auto_launcher.py console  ou  python auto_launcher.py gui
@@ -13,6 +14,349 @@ from gui_utils import center_window
 from system_check import SystemChecker
 
 
+def show_console_menu():
+    """Exibe menu interativo no console"""
+    while True:
+        try:
+            print("\n" + "="*75)
+            print("MENU PRINCIPAL - MENINO DA TI")
+            print("="*75)
+            print("\n[1] 🔧 Verificar Status do Sistema")
+            print("[2] 📦 Atualizar Aplicativos (winget)")
+            print("[3] 🪟 Atualizar Windows")
+            print("[4] 🚀 Atualizar Tudo (Aplicativos + Windows)")
+            print("[5] 🧹 Limpeza do Sistema")
+            print("[6] ℹ️  Informações do Sistema")
+            print("[0] ❌ Sair")
+            print("\n" + "="*75)
+            
+            escolha = input("\nDigite sua escolha: ").strip()
+            
+            if escolha == "0":
+                print("\n👋 Encerrando aplicação...")
+                print("Obrigado por usar o Menino da TI!")
+                break
+            
+            elif escolha == "1":
+                verificar_status_sistema()
+            
+            elif escolha == "2":
+                atualizar_aplicativos()
+            
+            elif escolha == "3":
+                atualizar_windows()
+            
+            elif escolha == "4":
+                atualizar_tudo()
+            
+            elif escolha == "5":
+                limpeza_sistema()
+            
+            elif escolha == "6":
+                mostrar_informacoes_sistema()
+            
+            else:
+                print("\n❌ Opção inválida! Por favor, escolha uma opção de 0 a 6.")
+                input("\nPressione Enter para continuar...")
+        
+        except KeyboardInterrupt:
+            print("\n\n👋 Encerrando aplicação...")
+            print("Obrigado por usar o Menino da TI!")
+            break
+        except EOFError:
+            print("\n\n👋 Entrada encerrada. Saindo...")
+            break
+        except Exception as e:
+            print(f"\n❌ Erro inesperado: {e}")
+            print("Continuando operação normal...")
+            input("\nPressione Enter para continuar...")
+
+
+def verificar_status_sistema():
+    """Verifica status do sistema"""
+    print("\n" + "="*75)
+    print("VERIFICANDO STATUS DO SISTEMA")
+    print("="*75 + "\n")
+    
+    try:
+        from powershell_manager import PowerShellManager
+        ps_manager = PowerShellManager()
+        
+        # Verificar privilégios de administrador
+        if ps_manager.check_admin_privileges():
+            print("✓ Executando como Administrador")
+        else:
+            print("⚠️  NÃO está executando como Administrador")
+            print("   Algumas operações podem falhar.\n")
+        
+        # Verificar winget
+        print("Verificando winget...")
+        is_installed, msg = ps_manager.install_winget_if_needed()
+        if is_installed:
+            print("✓ Winget disponível")
+        else:
+            print(f"⚠️  {msg}")
+        
+        print("\n✓ Verificação concluída!")
+    
+    except Exception as e:
+        print(f"❌ Erro ao verificar sistema: {e}")
+    
+    input("\nPressione Enter para voltar ao menu...")
+
+
+def atualizar_aplicativos():
+    """Atualiza aplicativos com winget"""
+    print("\n" + "="*75)
+    print("ATUALIZANDO APLICATIVOS")
+    print("="*75 + "\n")
+    
+    print("Escolha o método de atualização:\n")
+    print("[1] 🚀 Atualização Rápida (atualiza tudo de uma vez)")
+    print("[2] 📊 Atualização Detalhada (atualiza um por um com progresso)")
+    print("[0] ❌ Cancelar\n")
+    
+    escolha = input("Digite sua escolha: ").strip()
+    
+    if escolha == "0":
+        print("\n❌ Operação cancelada.")
+        input("\nPressione Enter para voltar ao menu...")
+        return
+    
+    confirmacao = input("\nDeseja prosseguir com a atualização de aplicativos? (S/N): ").strip().upper()
+    
+    if confirmacao != 'S':
+        print("\n❌ Operação cancelada.")
+        input("\nPressione Enter para voltar ao menu...")
+        return
+    
+    try:
+        from powershell_manager import PowerShellManager
+        ps_manager = PowerShellManager()
+        
+        print("\nVerificando winget...")
+        is_installed, msg = ps_manager.install_winget_if_needed()
+        
+        if not is_installed:
+            print(f"❌ {msg}")
+            input("\nPressione Enter para voltar ao menu...")
+            return
+        
+        if escolha == "1":
+            # Método rápido - atualiza tudo de uma vez
+            print("\n🔄 Iniciando atualização rápida (bulk update)...")
+            print("Isso pode levar vários minutos...\n")
+            
+            success, output = ps_manager.update_all_apps_with_winget()
+            
+            if output:
+                print(output)
+            
+            if success:
+                print("\n✓ Aplicativos atualizados com sucesso!")
+            else:
+                print("\n⚠️  Houve problemas na atualização de aplicativos.")
+        
+        else:
+            # Método detalhado - atualiza um por um
+            print("\n🔄 Iniciando atualização detalhada...")
+            print("Listando aplicativos para atualizar...\n")
+            
+            def progress_callback(current, total, app_name, success):
+                if success is None:
+                    print(f"[{current}/{total}] Atualizando: {app_name}...")
+                elif success:
+                    print(f"[{current}/{total}] ✓ {app_name} - Atualizado com sucesso")
+                else:
+                    print(f"[{current}/{total}] ✗ {app_name} - Falha na atualização")
+            
+            successful, failed, failed_apps = ps_manager.update_apps_individually(progress_callback)
+            
+            print(f"\n{'='*75}")
+            print("RESUMO DA ATUALIZAÇÃO")
+            print('='*75)
+            print(f"\n✓ Atualizados com sucesso: {successful}")
+            print(f"✗ Falharam: {failed}")
+            
+            if failed_apps:
+                print("\nAplicativos que falharam:")
+                for app in failed_apps:
+                    print(f"  - {app['name']} ({app['id']})")
+    
+    except Exception as e:
+        print(f"\n❌ Erro ao atualizar aplicativos: {e}")
+    
+    input("\nPressione Enter para voltar ao menu...")
+
+
+def atualizar_windows():
+    """Atualiza o Windows"""
+    print("\n" + "="*75)
+    print("ATUALIZANDO WINDOWS")
+    print("="*75 + "\n")
+    
+    confirmacao = input("Deseja prosseguir com o Windows Update? (S/N): ").strip().upper()
+    
+    if confirmacao != 'S':
+        print("\n❌ Operação cancelada.")
+        input("\nPressione Enter para voltar ao menu...")
+        return
+    
+    try:
+        from powershell_manager import PowerShellManager
+        ps_manager = PowerShellManager()
+        
+        print("\nVerificando módulo PSWindowsUpdate...")
+        module_success, module_msg = ps_manager.install_pswindowsupdate_module()
+        print(module_msg)
+        
+        if not module_success:
+            input("\nPressione Enter para voltar ao menu...")
+            return
+        
+        print("\n🔄 Iniciando Windows Update...")
+        print("Isso pode levar muito tempo...\n")
+        
+        success, output = ps_manager.run_windows_update()
+        
+        if output:
+            print(output)
+        
+        if success or "No updates available" in output or "não há atualizações" in output.lower():
+            print("\n✓ Windows Update concluído!")
+        else:
+            print("\n⚠️  Houve problemas no Windows Update.")
+    
+    except Exception as e:
+        print(f"\n❌ Erro ao executar Windows Update: {e}")
+    
+    input("\nPressione Enter para voltar ao menu...")
+
+
+def atualizar_tudo():
+    """Atualiza aplicativos e Windows"""
+    print("\n" + "="*75)
+    print("ATUALIZAÇÃO COMPLETA (APLICATIVOS + WINDOWS)")
+    print("="*75 + "\n")
+    
+    confirmacao = input("Deseja prosseguir com a atualização completa? (S/N): ").strip().upper()
+    
+    if confirmacao != 'S':
+        print("\n❌ Operação cancelada.")
+        input("\nPressione Enter para voltar ao menu...")
+        return
+    
+    print("\n" + "="*75)
+    print("ETAPA 1/2: ATUALIZANDO APLICATIVOS")
+    print("="*75 + "\n")
+    
+    try:
+        from powershell_manager import PowerShellManager
+        ps_manager = PowerShellManager()
+        
+        # Etapa 1: Aplicativos
+        is_installed, msg = ps_manager.install_winget_if_needed()
+        
+        if is_installed:
+            print("🔄 Atualizando aplicativos...")
+            success, output = ps_manager.update_all_apps_with_winget()
+            
+            if output:
+                print(output)
+            
+            if success:
+                print("\n✓ Aplicativos atualizados!")
+            else:
+                print("\n⚠️  Problemas ao atualizar aplicativos.")
+        else:
+            print(f"⚠️  {msg}")
+        
+        # Etapa 2: Windows
+        print("\n" + "="*75)
+        print("ETAPA 2/2: ATUALIZANDO WINDOWS")
+        print("="*75 + "\n")
+        
+        module_success, module_msg = ps_manager.install_pswindowsupdate_module()
+        print(module_msg)
+        
+        if module_success:
+            print("\n🔄 Executando Windows Update...")
+            success, output = ps_manager.run_windows_update()
+            
+            if output:
+                print(output)
+            
+            if success or "No updates available" in output:
+                print("\n✓ Windows Update concluído!")
+            else:
+                print("\n⚠️  Problemas no Windows Update.")
+        
+        print("\n" + "="*75)
+        print("ATUALIZAÇÃO COMPLETA FINALIZADA")
+        print("="*75)
+    
+    except Exception as e:
+        print(f"\n❌ Erro durante atualização: {e}")
+    
+    input("\nPressione Enter para voltar ao menu...")
+
+
+def limpeza_sistema():
+    """Executa limpeza do sistema"""
+    print("\n" + "="*75)
+    print("LIMPEZA DO SISTEMA")
+    print("="*75 + "\n")
+    
+    print("🧹 Limpeza de sistema incluirá:")
+    print("  - Arquivos temporários")
+    print("  - Cache do sistema")
+    print("  - Lixeira")
+    print("  - Arquivos de log antigos\n")
+    
+    confirmacao = input("Deseja prosseguir com a limpeza? (S/N): ").strip().upper()
+    
+    if confirmacao != 'S':
+        print("\n❌ Operação cancelada.")
+        input("\nPressione Enter para voltar ao menu...")
+        return
+    
+    try:
+        from cleanup_manager import CleanupManager
+        cleanup = CleanupManager()
+        
+        print("\n🔄 Iniciando limpeza do sistema...\n")
+        
+        # Executar limpeza
+        results = cleanup.run_all_cleanup()
+        
+        print("\n✓ Limpeza concluída!")
+        print(f"\nEspaço liberado: {results.get('total_freed', 'N/A')}")
+    
+    except ImportError:
+        print("⚠️  Módulo de limpeza não disponível.")
+    except Exception as e:
+        print(f"\n❌ Erro durante limpeza: {e}")
+    
+    input("\nPressione Enter para voltar ao menu...")
+
+
+def mostrar_informacoes_sistema():
+    """Mostra informações detalhadas do sistema"""
+    print("\n" + "="*75)
+    print("INFORMAÇÕES DO SISTEMA")
+    print("="*75 + "\n")
+    
+    try:
+        system_checker = SystemChecker()
+        system_checker.print_system_info()
+        system_checker.print_compatibility_status()
+    
+    except Exception as e:
+        print(f"❌ Erro ao obter informações: {e}")
+    
+    input("\nPressione Enter para voltar ao menu...")
+
+
 def launch_console_mode():
     """Inicia a aplicação em modo console"""
     print("\n" + "="*75)
@@ -22,8 +366,11 @@ def launch_console_mode():
     splash = ConsoleSplash()
     splash.show()
     
-    print("✓ Aplicação iniciada em modo console!")
-    print("\nAguardando comandos...\n")
+    print("\n✓ Aplicação iniciada em modo console!")
+    print("\n")
+    
+    # Inicia o menu interativo
+    show_console_menu()
 
 
 def launch_gui_mode():

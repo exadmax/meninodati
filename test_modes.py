@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+import io
+import sys
+# Force UTF-8 output
+if sys.stdout.encoding != 'utf-8':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
 """
 test_modes.py - Teste dos modos console e gráfico
 """
@@ -15,7 +22,7 @@ def test_console_mode():
     splash = ConsoleSplash()
     splash.show()
     
-    print("✓ Modo console iniciado com sucesso!")
+    print("[OK] Modo console iniciado com sucesso!")
     print("\nO modo console estaria pronto para processar comandos de diagnóstico.")
     time.sleep(2)
 

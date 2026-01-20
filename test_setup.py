@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+import io
+import sys
+# Force UTF-8 output
+if sys.stdout.encoding != 'utf-8':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+
 """
 Test Script - Menino de TI Helper
 This script tests if the PowerShell integration is working correctly
@@ -96,7 +103,7 @@ def test_python_dependencies():
     
     try:
         import tkinter
-        print("✓ tkinter está instalado")
+        print("[OK] tkinter está instalado")
         tkinter_ok = True
     except ImportError:
         print("✗ tkinter NÃO está instalado")
@@ -105,7 +112,7 @@ def test_python_dependencies():
     
     try:
         from PIL import Image
-        print("✓ Pillow está instalado")
+        print("[OK] Pillow está instalado")
         pillow_ok = True
     except ImportError:
         print("⚠ Pillow NÃO está instalado (opcional)")
@@ -117,9 +124,9 @@ def test_python_dependencies():
 
 def main():
     """Run all tests"""
-    print("\n" + "🔧"*30)
+    print("\n" + "="*70)
     print("  MENINO DE TI HELPER - TESTE DE SISTEMA")
-    print("🔧"*30)
+    print("="*70)
     
     print("\nEste script verifica se tudo está configurado corretamente")
     print("para executar o Menino de TI Helper.\n")

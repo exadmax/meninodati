@@ -264,7 +264,8 @@ class ExeBuilderGUI:
             self.root.after(self._finalize_build, success, message)
             
         except Exception as e:
-            self.root.after(lambda: self._finalize_build(False, f"Erro: {str(e)}"))
+            error_msg = f"Erro: {str(e)}"
+            self.root.after(lambda msg=error_msg: self._finalize_build(False, msg))
     
     def _finalize_build(self, success: bool, message: str):
         """Finaliza o processo de build"""

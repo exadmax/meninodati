@@ -58,51 +58,65 @@ class ConsoleSplash:
         Args:
             callback: Função callback para relatar progresso (0-100)
         """
-        self.clear_screen()
-        
-        # Exibe arte ASCII
-        print(self.ASCII_ART)
-        
-        # Exibe itens de status com animação
-        for i, status in enumerate(self.STATUS_ITEMS):
-            if i < 2:
-                print(f"|  [OK] {status:<60}|")
-            else:
-                print(f"|  [..] {status:<60}|")
-            time.sleep(0.8)
+        try:
+            self.clear_screen()
             
-            # Simula progresso
-            progress_percent = int((i / len(self.STATUS_ITEMS)) * 65)
-            self.progress = progress_percent
+            # Exibe arte ASCII
+            print(self.ASCII_ART)
             
-            if callback:
-                callback(progress_percent)
-        
-        # Simula carregamento final
-        print("|                                                                       |")
-        print("|  PROGRESSO:                                                           |")
-        
-        # Animação da barra de progresso
-        for step in range(26):  # De 65% a 100%
-            progress_percent = 65 + step
-            filled = int((progress_percent / 100) * 50)
-            bar = self.get_progress_bar(filled)
-            progress_line = f"|  {bar} {progress_percent}%{'':>9}|"
-            print(progress_line, end='\r')
+            # Exibe itens de status com animação
+            for i, status in enumerate(self.STATUS_ITEMS):
+                if i < 2:
+                    print(f"|  [OK] {status:<60}|")
+                else:
+                    print(f"|  [..] {status:<60}|")
+                time.sleep(0.8)
+                
+                # Simula progresso
+                progress_percent = int((i / len(self.STATUS_ITEMS)) * 65)
+                self.progress = progress_percent
+                
+                if callback:
+                    try:
+                        callback(progress_percent)
+                    except Exception as e:
+                        print(f"⚠️  Erro no callback de progresso: {e}")
             
-            self.progress = progress_percent
-            if callback:
-                callback(progress_percent)
+            # Simula carregamento final
+            print("|                                                                       |")
+            print("|  PROGRESSO:                                                           |")
             
-            time.sleep(0.05)
+            # Animação da barra de progresso
+            for step in range(26):  # De 65% a 100%
+                progress_percent = 65 + step
+                filled = int((progress_percent / 100) * 50)
+                bar = self.get_progress_bar(filled)
+                progress_line = f"|  {bar} {progress_percent}%{'':>9}|"
+                print(progress_line, end='\r')
+                
+                self.progress = progress_percent
+                if callback:
+                    try:
+                        callback(progress_percent)
+                    except Exception as e:
+                        print(f"⚠️  Erro no callback de progresso: {e}")
+                
+                time.sleep(0.05)
+            
+            print()  # Nova linha após barra
+            print(self.FOOTER)
+            
+            # Mensagem final
+            time.sleep(1)
+            print("\n  Inicializando aplicação...\n")
+            time.sleep(0.5)
         
-        print()  # Nova linha após barra
-        print(self.FOOTER)
-        
-        # Mensagem final
-        time.sleep(1)
-        print("\n  Inicializando aplicação...\n")
-        time.sleep(0.5)
+        except KeyboardInterrupt:
+            print("\n\n⚠️  Inicialização interrompida pelo usuário.")
+            raise
+        except Exception as e:
+            print(f"\n\n❌ Erro durante inicialização: {e}")
+            print("Continuando em modo console simplificado...\n")
     
     def show_simple(self):
         """Exibe apenas a tela sem animação"""

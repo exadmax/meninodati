@@ -580,9 +580,10 @@ class MeninoDeTIHelperGUI:
             logger.error(f"Erro na atualização completa: {str(e)}", exc_info=True)
             if progress_win:
                 progress_win.log(f"ERRO: {str(e)}")
-            self.root.after(0, lambda: messagebox.showerror(
+            error_msg = str(e)
+            self.root.after(0, lambda msg=error_msg: messagebox.showerror(
                 "Erro",
-                f"Ocorreu um erro durante a atualização:\n\n{str(e)}"
+                f"Ocorreu um erro durante a atualização:\n\n{msg}"
             ))
         finally:
             if progress_win:
@@ -633,7 +634,8 @@ class MeninoDeTIHelperGUI:
             logger.error(f"Erro: {str(e)}", exc_info=True)
             if progress_win:
                 progress_win.log(f"ERRO: {str(e)}")
-            self.root.after(0, lambda: messagebox.showerror("Erro", str(e)))
+            error_msg = str(e)
+            self.root.after(0, lambda msg=error_msg: messagebox.showerror("Erro", msg))
         finally:
             if progress_win:
                 self.root.after(0, progress_win.close)
@@ -682,7 +684,8 @@ class MeninoDeTIHelperGUI:
             logger.error(f"Erro: {str(e)}", exc_info=True)
             if progress_win:
                 progress_win.log(f"ERRO: {str(e)}")
-            self.root.after(0, lambda: messagebox.showerror("Erro", str(e)))
+            error_msg = str(e)
+            self.root.after(0, lambda msg=error_msg: messagebox.showerror("Erro", msg))
         finally:
             if progress_win:
                 self.root.after(0, progress_win.close)

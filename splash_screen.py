@@ -56,6 +56,7 @@ class SplashScreen:
         
         # Imagem de carregamento se existir
         self.photo_image = None
+        self.image_label = None
         if self.image_path and os.path.exists(self.image_path):
             try:
                 image = Image.open(self.image_path)
@@ -63,11 +64,16 @@ class SplashScreen:
                 image.thumbnail((300, 200), Image.Resampling.LANCZOS)
                 self.photo_image = ImageTk.PhotoImage(image)
                 
-                image_label = ttk.Label(main_frame, image=self.photo_image)
-                image_label.pack(pady=10)
+                # Manter referência ao label também
+                self.image_label = ttk.Label(main_frame, image=self.photo_image)
+                self.image_label.pack(pady=10)
+                # Garantir que a imagem não seja coletada pelo garbage collector
+                self.image_label.image = self.photo_image
             except Exception as e:
-                print(f"Erro ao carregar imagem: {e}")
+                print(f"⚠️  Aviso: Não foi possível carregar imagem de splash: {e}")
+                # Continuar sem imagem - não é erro crítico
                 self.photo_image = None
+                self.image_label = None
         
         # Texto de carregamento
         text_frame = ttk.Frame(main_frame)

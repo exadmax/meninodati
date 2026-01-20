@@ -1,0 +1,34 @@
+{
+  "timestamp": "2026-01-20T14:43:33.028117",
+  "total_suites": 4,
+  "passed_suites": 4,
+  "failed_suites": 0,
+  "total_time": 34.44775342941284,
+  "results": {
+    "test_automation_framework.py": {
+      "description": "Framework de Testes (PowerShell, Cleanup, Integração)",
+      "success": true,
+      "exit_code": 0,
+      "timestamp": "2026-01-20T14:43:08.293232"
+    },
+    "test_clickable_elements.py": {
+      "description": "Testes de GUI com Simulação de Cliques",
+      "success": true,
+      "exit_code": 0,
+      "timestamp": "2026-01-20T14:43:10.244993"
+    },
+    "test_setup.py": {
+      "description": "Verificação de Setup e Compatibilidade",
+      "success": true,
+      "exit_code": 0,
+      "timestamp": "2026-01-20T14:43:23.375460"
+    },
+    "test_modes.py": {
+      "description": "Verificação de Modos de Operação",
+      "success": true,
+      "exit_code": 0,
+      "timestamp": "2026-01-20T14:43:33.026546"
+    }
+  },
+  "errors": []
+}
